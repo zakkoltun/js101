@@ -1,9 +1,9 @@
 const readline = require('readline-sync');
-const VALID_CHOICES = ['rock', 'paper', 'scissors']
+const VALID_CHOICES = ['rock', 'paper', 'scissors'];
 const WINNING_COMBINATIONS = {
-  'rock': 'scissors',
-  'paper': 'rock',
-  'scissors': 'paper'
+  rock: 'scissors',
+  paper: 'rock',
+  scissors: 'paper'
 };
 
 function prompt(message) {
