@@ -1,0 +1,49 @@
+1. function that returns the sums of two numbers
+
+START
+
+# Given two input numbers "number1" and "number2"
+
+PRINT number1 + number2
+
+END
+
+------------------------
+
+2. function that takes an array of strings, and returns a string that is all
+those strings concatenated
+
+START
+
+# Given a collection of strings called "strings"
+
+SET result = strings in "strings" joined, separated with no characters
+
+PRINT result
+
+END
+
+------------------------
+
+3. function that takes an array of integers, and returns a new array with every
+other element
+
+START
+
+# Given a collection of integers called "numbers"
+
+SET iterator = 1
+SET everyOther = empty collection (this will be returned at end)
+
+WHILE iterator <= length of numbers
+  IF iterator is odd
+    SET currentNumber = value within numbers collection at space "iterator"
+    push currentNumber to everyOther
+  ELSE
+    skip to the next iteration
+
+  iterator = iterator + 1
+
+PRINT everyOther
+
+END
