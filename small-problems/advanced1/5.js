@@ -4,13 +4,8 @@ function merge(list1, list2) {
   let idx1 = 0;
   let idx2 = 0;
 
-  if (list1.length === 0) {
-    return list2;
-  }
-
-  if (list2.length === 0) {
-    return list1;
-  }
+  if (list1.length === 0) return list2;
+  if (list2.length === 0) return list1;
 
   while (idx1 < list1.length || idx2 < list2.length) {
     let element1 = list1[idx1];
