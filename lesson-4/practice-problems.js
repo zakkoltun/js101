@@ -3,9 +3,11 @@
 // returns [1, 2, 3], since 'hi' evalutes to truthy every time
 
 // 2
+/*
 [1, 2, 3].map(num => {
   num * num;
 });
+*/
 // [undefined, undefined, undefined]
 // since map statement doesn't return anything
 
@@ -14,26 +16,32 @@
 // [1, 4, 9], since one statement callbacks w/o braces automatically return
 
 // 4
+/*
 ['ant', 'bear', 'caterpillar'].pop().length;
+*/
 // 11, since pop returns the string that is removed, not the array
 
 // 5
+/*
 [1, 2, 3].every(num => {
   return num = num * 2;
 });
+*/
 // returns true, since 'return num = num * 2' always evaluates to true
 
 // 6
-let arr = [1, 2, 3, 4, 5]
+let arr = [1, 2, 3, 4, 5];
 arr.fill(1, 1, 5);
 // [1, 1, 1, 1, 1]. It's destructive (mutates caller)
 
 // 7
+/*
 ['ant', 'bear'].map(elem => {
   if (elem.length > 3) {
     return elem;
   }
 });
+*/
 // [undefined, 'ant']
 
 // 8
