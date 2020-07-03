@@ -1,13 +1,23 @@
+// Constants
 const INITIAL_MARKER = ' ';
 const PLAYER_MARKER = 'X';
 const COMPUTER_MARKER = 'O';
+
 const GAMES_PER_MATCH = 2;
 const BOARD_LENGTH = 3;
+
+const FIRST_PLAYER = 'choose'; // can be 'player', 'computer', or 'choose'
+
 const WINNING_LINES = [
   [1, 2, 3], [4, 5, 6], [7, 8, 9], // rows
   [1, 4, 7], [2, 5, 8], [3, 6, 9], // columns
   [1, 5, 9], [3, 5, 7]             // diagonals
-]; 
+];
+
+const PLAYER_MOVE_FUNCTION = {
+  player: playerChoosesSquare,
+  computer: computerChoosesSquare
+};
 
 let readline = require('readline-sync');
 
@@ -173,24 +183,66 @@ function count(arr, val) {
   return arr.filter(elem => elem === val).length;
 }
 
+function determineFirstPlayer() {
+  let firstPlayer;
+
+  if (FIRST_PLAYER !== 'choose') {
+    firstPlayer = FIRST_PLAYER;
+  } else {
+    prompt("Who will go first? (Enter 'player' or 'computer')");
+    firstPlayer = readline.question();
+
+    while (!['computer', 'player'].includes(firstPlayer)) {
+      prompt("Invalid answer. Enter 'player' or 'computer'.");
+      firstPlayer = readline.question();
+    }
+  }
+
+  return firstPlayer;
+}
+
+function determinePlayerOrder(firstPlayer) {
+  let playerOrder = firstPlayer === 'player' ?
+    ['player', 'computer'] :
+    ['computer', 'player'];
+  return playerOrder;
+}
+
+function playersTakeTurns(board, players) {
+  function alternatePlayer(player) {
+    let newPlayerIdx = Math.abs(players.indexOf(player) - 1);
+    return players[newPlayerIdx];
+  }
+
+  let currentPlayer = players[0];
+
+  while (true) {
+    displayBoard(board);
+
+    chooseSquare(board, currentPlayer);
+    currentPlayer = alternatePlayer(currentPlayer);
+    if (someoneWon(board) || boardFull(board)) break;
+  }
+}
+
+function chooseSquare(board, player) {
+  PLAYER_MOVE_FUNCTION[player](board);
+  displayBoard(board);
+}
+
 // ----------------------------
 
 while (true) {
   let playerWins = 0;
   let computerWins = 0;
 
+  let firstPlayer = determineFirstPlayer();
+  let playerOrder = determinePlayerOrder(firstPlayer);
+
   while (playerWins < GAMES_PER_MATCH && computerWins < GAMES_PER_MATCH) {
     let board = initializeBoard();
 
-    while (true) {
-      displayBoard(board);
-
-      playerChoosesSquare(board);
-      if (someoneWon(board) || boardFull(board)) break;
-
-      computerChoosesSquare(board);
-      if (someoneWon(board) || boardFull(board)) break;
-    }
+    playersTakeTurns(board, playerOrder);
 
     displayBoard(board);
 
