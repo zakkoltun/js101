@@ -112,21 +112,6 @@ function offensiveMove(board) {
   return smartMove(board, COMPUTER_MARKER);
 }
 
-/*
-function offensiveMove(board) {
-  for (let i = 0; i < WINNING_LINES.length; i++) {
-    let line = WINNING_LINES[i];
-    let lineValues = line.map(square => board[square]);
-    if (count(lineValues, COMPUTER_MARKER) === 2 &&
-        count(lineValues, INITIAL_MARKER) === 1) {
-      let defensiveSquare = line[lineValues.indexOf(INITIAL_MARKER)];
-      return defensiveSquare;
-    }
-  }
-  return null;
-}
-*/
-
 function offensiveMoveAvailable(board) {
   return !!offensiveMove(board);
 }
@@ -135,21 +120,6 @@ function defensiveMove(board) {
   // A defensive move by the computer blocks row dominated by player
   return smartMove(board, PLAYER_MARKER);
 }
-
-/*
-function defensiveMove(board) {
-  for (let i = 0; i < WINNING_LINES.length; i++) {
-    let line = WINNING_LINES[i];
-    let lineValues = line.map(square => board[square]);
-    if (count(lineValues, PLAYER_MARKER) === 2 &&
-        count(lineValues, INITIAL_MARKER) === 1) {
-      let defensiveSquare = line[lineValues.indexOf(INITIAL_MARKER)];
-      return defensiveSquare;
-    }
-  }
-  return null;
-}
-*/
 
 function defensiveMoveAvailable(board) {
   return !!defensiveMove(board);
