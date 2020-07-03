@@ -1,7 +1,7 @@
 const INITIAL_MARKER = ' ';
 const PLAYER_MARKER = 'X';
 const COMPUTER_MARKER = 'O';
-const WIN_GOAL = 5;
+const GAMES_PER_MATCH = 2;
 const BOARD_LENGTH = 3;
 const WINNING_LINES = [
   [1, 2, 3], [4, 5, 6], [7, 8, 9], // rows
@@ -176,29 +176,54 @@ function count(arr, val) {
 // ----------------------------
 
 while (true) {
-  let board = initializeBoard();
+  let playerWins = 0;
+  let computerWins = 0;
 
-  while (true) {
+  while (playerWins < GAMES_PER_MATCH && computerWins < GAMES_PER_MATCH) {
+    let board = initializeBoard();
+
+    while (true) {
+      displayBoard(board);
+
+      playerChoosesSquare(board);
+      if (someoneWon(board) || boardFull(board)) break;
+
+      computerChoosesSquare(board);
+      if (someoneWon(board) || boardFull(board)) break;
+    }
+
     displayBoard(board);
 
-    playerChoosesSquare(board);
-    if (someoneWon(board) || boardFull(board)) break;
+    if (someoneWon(board)) {
+      let winner = detectWinner(board);
 
-    computerChoosesSquare(board);
-    if (someoneWon(board) || boardFull(board)) break;
-  }
+      switch (winner) {
+        case 'Player':
+          playerWins += 1;
+          break;
+        case 'Computer':
+          computerWins += 1;
+          break;
+      }
 
-  displayBoard(board);
+      prompt(`${winner} won!`);
+    } else {
+      prompt("It's a tie");
+    }
+    prompt(`Your score: ${playerWins}. Computer score: ${computerWins}`);
 
-  if (someoneWon(board)) {
-    prompt(`${detectWinner(board)} won!`);
-  } else {
-    prompt("It's a tie");
+    prompt('Press any key to continue.');
+    readline.question();
   }
 
   prompt('Play again? (y/n)');
   let answer = readline.question();
-  if (answer !== 'y') break;
+  //if (answer !== 'y') break;
+  while (!['y', 'n'].includes(answer)) {
+    prompt('Please enter y or n:');
+    answer = readline.question();
+  }
+  if (answer === 'n') break;
 }
 
 prompt('Thanks for playing Tic Tac Toe!');
