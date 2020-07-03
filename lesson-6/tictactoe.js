@@ -70,12 +70,15 @@ function playerChoosesSquare(board) {
 }
 
 function computerChoosesSquare(board) {
+  let emptySquares = getEmptySquares(board);
+
   if (offensiveMoveAvailable(board)) {
     board[offensiveMove(board)] = COMPUTER_MARKER;
   } else if (defensiveMoveAvailable(board)) {
     board[defensiveMove(board)] = COMPUTER_MARKER;
+  } else if (emptySquares.includes('5')) {
+    board['5'] = COMPUTER_MARKER;
   } else {
-    let emptySquares = getEmptySquares(board);
     let randomIndex = Math.floor(Math.random() * emptySquares.length);
 
     let square = emptySquares[randomIndex];
