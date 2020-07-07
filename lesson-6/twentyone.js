@@ -1,3 +1,6 @@
+const BUST_LIMIT = 21;
+const DEALER_HIT_LIMIT = 17;
+
 const CARD_VALUES = [
   '2', '3', '4', '5', '6', '7', '8', '9', '10',
   'J', 'Q', 'K', 'A'
@@ -113,7 +116,7 @@ function valuesExcludingAces(hand) {
 }
 
 function isBust(handTotal) {
-  return handTotal > 21;
+  return handTotal > BUST_LIMIT;
 }
 
 function bustMessage() {
@@ -177,6 +180,17 @@ function playAgain() {
   }
 }
 
+function getPlayerAction() {
+  prompt("Hit or stay? (Enter 'h' or 's')");
+  let action = readline.question();
+
+  while (!['h', 's'].includes(action)) {
+    prompt("Please enter 'h' or 's'");
+    action = readline.question();
+  }
+  return action;
+}
+
 // ----------------------------------------------------------------------
 
 // Game logic
@@ -197,13 +211,7 @@ while (true) {
     while (true) {
       displayGameInfo(playerHand, dealerHand, playerTotal);
 
-      prompt("Hit or stay? (Enter 'h' or 's')");
-      let action = readline.question();
-
-      while (!['h', 's'].includes(action)) {
-        prompt("Please enter 'h' or 's'");
-        action = readline.question();
-      }
+      let action = getPlayerAction();
 
       if (action === 'h') {
         drawCard(deck, playerHand);
@@ -223,7 +231,7 @@ while (true) {
     }
 
     while (true) {
-      if (dealerTotal > 17 || isBust(dealerTotal)) break;
+      if (dealerTotal > DEALER_HIT_LIMIT || isBust(dealerTotal)) break;
       drawCard(deck, dealerHand);
       dealerTotal = total(dealerHand);
     }
