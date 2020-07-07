@@ -116,10 +116,6 @@ function isBust(hand) {
   return handTotal(hand) > 21;
 }
 
-function isTwentyOne(hand) {
-  return handTotal(hand) === 21;
-}
-
 function bustMessage() {
   console.clear();
   prompt('Your hand is a bust!');
@@ -131,13 +127,16 @@ function stayMessage() {
 }
 
 function determineWinner(player, dealer) {
+  let playerTotal = handTotal(player);
+  let dealerTotal = handTotal(dealer);
+
   if (isBust(player)) {
     return 'dealer';
   } else if (isBust(dealer)) {
     return 'player';
-  } else if (handTotal(player) > handTotal(dealer)) {
+  } else if (playerTotal > dealerTotal) {
     return 'player';
-  } else if (handTotal(player) < handTotal(dealer)) {
+  } else if (playerTotal < dealerTotal) {
     return 'dealer';
   } else {
     return 'tie';
@@ -152,55 +151,87 @@ function displayResults(player, dealer) {
 
   console.log('\n');
 
-  prompt(`Winner: ${determineWinner(player, dealer)}`);
+  switch (determineWinner(player, dealer)) {
+    case 'player':
+      prompt('You won!!');
+      break;
+    case 'dealer':
+      prompt('Dealer won. Better luck next time!');
+      break;
+    default:
+      prompt('Tie!');
+      break;
+  }
+}
+
+function playAgain() {
+  prompt(`Play again? (y/n)`);
+  let answer = readline.question();
+
+  while (!['y', 'n'].includes(answer)) {
+    prompt("Please enter 'y' or 'n'.");
+    answer = readline.question();
+  }
+
+  if (answer === 'y') {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 // ----------------------------------------------------------------------
 
 // Game logic
 
-let deck = initializeDeck();
-
-let playerHand = [];
-let dealerHand = [];
-
-dealHands(deck, [playerHand, dealerHand]);
-
 while (true) {
-  // player actions
+  let deck = initializeDeck();
+
+  let playerHand = [];
+  let dealerHand = [];
+
+  dealHands(deck, [playerHand, dealerHand]);
+
   while (true) {
-    displayGameInfo(playerHand, dealerHand);
+    // player actions
+    while (true) {
+      displayGameInfo(playerHand, dealerHand);
 
-    prompt("Hit or stay? (Enter 'hit' or 'stay')");
-    let action = readline.question();
+      prompt("Hit or stay? (Enter 'hit' or 'stay')");
+      let action = readline.question();
 
-    while (!['hit', 'stay'].includes(action)) {
-      prompt("Please enter 'hit' or 'stay'");
-      action = readline.question();
+      while (!['hit', 'stay'].includes(action)) {
+        prompt("Please enter 'hit' or 'stay'");
+        action = readline.question();
+      }
+
+      if (action === 'hit') {
+        drawCard(deck, playerHand);
+        displayResults(playerHand, dealerHand);
+        prompt('You chose to hit.');
+      }
+
+      if (action === 'stay' || isBust(playerHand)) break;
+
+      //displayGameInfo(playerHand, dealerHand);
     }
 
-    if (action === 'hit') {
-      drawCard(deck, playerHand);
+    if (isBust(playerHand)) {
+      bustMessage();
+      break;
+    } else {
+      stayMessage();
     }
 
-    if (action === 'stay' || isBust(playerHand)) break;
+    while (true) {
+      if (handTotal(dealerHand) > 17 || isBust(dealerHand)) break;
+      drawCard(deck, dealerHand);
+    }
 
-    displayGameInfo(playerHand, dealerHand);
-  }
-
-  if (isBust(playerHand)) {
-    bustMessage();
     break;
-  } else {
-    stayMessage();
   }
 
-  while (true) {
-    if (handTotal(dealerHand) > 17 || isBust(dealerHand)) break;
-    drawCard(deck, dealerHand);
-  }
+  displayResults(playerHand, dealerHand);
 
-  break;
+  if (!playAgain()) break;
 }
-
-displayResults(playerHand, dealerHand);
