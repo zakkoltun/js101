@@ -28,12 +28,12 @@ function revealFirstCard(hand) {
   return hand[0];
 }
 
-function displayGameInfo(playerHand, dealerHand) {
+function displayGameInfo(playerHand, dealerHand, playerTotal) {
   console.clear();
 
   prompt(`Your hand: ${playerHand.join(', ')}`);
   prompt(`Dealer's top card: ${revealFirstCard(dealerHand)}\n`);
-  prompt(`Your hand total: ${total(playerHand)}`);
+  prompt(`Your hand total: ${playerTotal}`);
 }
 
 // removes card from top of deck and adds to hand
@@ -112,8 +112,8 @@ function valuesExcludingAces(hand) {
   return hand.map(card => nonAceCardValue(card));
 }
 
-function isBust(hand) {
-  return total(hand) > 21;
+function isBust(handTotal) {
+  return handTotal > 21;
 }
 
 function bustMessage() {
@@ -126,13 +126,10 @@ function stayMessage() {
   prompt('You chose to stay.');
 }
 
-function determineWinner(player, dealer) {
-  let playerTotal = total(player);
-  let dealerTotal = total(dealer);
-
-  if (isBust(player)) {
+function determineWinner(playerTotal, dealerTotal) {
+  if (isBust(playerTotal)) {
     return 'dealer';
-  } else if (isBust(dealer)) {
+  } else if (isBust(dealerTotal)) {
     return 'player';
   } else if (playerTotal > dealerTotal) {
     return 'player';
@@ -143,15 +140,15 @@ function determineWinner(player, dealer) {
   }
 }
 
-function displayResults(player, dealer) {
+function displayResults(playerHand, dealerHand, playerTotal, dealerTotal) {
   console.log('\n');
 
-  prompt(`Your hand: ${player}. Score: ${total(player)}`);
-  prompt(`Dealer hand: ${dealer}. Score: ${total(dealer)}`);
+  prompt(`Your hand: ${playerHand}. Score: ${playerTotal}`);
+  prompt(`Dealer hand: ${dealerHand}. Score: ${dealerTotal}`);
 
   console.log('\n');
 
-  switch (determineWinner(player, dealer)) {
+  switch (determineWinner(playerTotal, dealerTotal)) {
     case 'player':
       prompt('You won!!');
       break;
@@ -198,7 +195,7 @@ while (true) {
   while (true) {
     // player actions
     while (true) {
-      displayGameInfo(playerHand, dealerHand);
+      displayGameInfo(playerHand, dealerHand, playerTotal);
 
       prompt("Hit or stay? (Enter 'h' or 's')");
       let action = readline.question();
@@ -210,13 +207,15 @@ while (true) {
 
       if (action === 'h') {
         drawCard(deck, playerHand);
-        displayResults(playerHand, dealerHand);
+        playerTotal = total(playerHand);
+
+        displayResults(playerHand, dealerHand, playerTotal, dealerTotal);
       }
 
-      if (action === 's' || isBust(playerHand)) break;
+      if (action === 's' || isBust(playerTotal)) break;
     }
 
-    if (isBust(playerHand)) {
+    if (isBust(playerTotal)) {
       bustMessage();
       break;
     } else {
@@ -224,14 +223,15 @@ while (true) {
     }
 
     while (true) {
-      if (total(dealerHand) > 17 || isBust(dealerHand)) break;
+      if (dealerTotal > 17 || isBust(dealerTotal)) break;
       drawCard(deck, dealerHand);
+      dealerTotal = total(dealerHand);
     }
 
     break;
   }
 
-  displayResults(playerHand, dealerHand);
+  displayResults(playerHand, dealerHand, playerTotal, dealerTotal);
 
   if (!playAgain()) break;
 }
