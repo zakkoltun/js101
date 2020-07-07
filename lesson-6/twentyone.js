@@ -33,7 +33,7 @@ function displayGameInfo(playerHand, dealerHand) {
 
   prompt(`Your hand: ${playerHand.join(', ')}`);
   prompt(`Dealer's top card: ${revealFirstCard(dealerHand)}\n`);
-  prompt(`Your hand total: ${handTotal(playerHand)}`);
+  prompt(`Your hand total: ${total(playerHand)}`);
 }
 
 // removes card from top of deck and adds to hand
@@ -81,9 +81,9 @@ function addNumberValues(list) {
 
 // input: arr, output: arr
 // converts hand of strings to their number values
-function handValues(hand) {
-  let total = handTotalExcludingAces(hand); // excludes aces
-  let handVals = handValuesExcludingAces(hand);
+function values(hand) {
+  let total = totalExcludingAces(hand); // excludes aces
+  let handVals = valuesExcludingAces(hand);
 
   let numAces = countAcesInHand(hand);
 
@@ -99,21 +99,21 @@ function handValues(hand) {
 
 // input: arr, output: number
 // returns the total value of cards in a hand (including aces)
-function handTotal(hand) {
-  let handVals = handValues(hand);
+function total(hand) {
+  let handVals = values(hand);
   return addNumberValues(handVals);
 }
 
-function handTotalExcludingAces(hand) {
-  return addNumberValues(handValuesExcludingAces(hand));
+function totalExcludingAces(hand) {
+  return addNumberValues(valuesExcludingAces(hand));
 }
 
-function handValuesExcludingAces(hand) {
+function valuesExcludingAces(hand) {
   return hand.map(card => nonAceCardValue(card));
 }
 
 function isBust(hand) {
-  return handTotal(hand) > 21;
+  return total(hand) > 21;
 }
 
 function bustMessage() {
@@ -127,8 +127,8 @@ function stayMessage() {
 }
 
 function determineWinner(player, dealer) {
-  let playerTotal = handTotal(player);
-  let dealerTotal = handTotal(dealer);
+  let playerTotal = total(player);
+  let dealerTotal = total(dealer);
 
   if (isBust(player)) {
     return 'dealer';
@@ -146,8 +146,8 @@ function determineWinner(player, dealer) {
 function displayResults(player, dealer) {
   console.log('\n');
 
-  prompt(`Your hand: ${player}. Score: ${handTotal(player)}`);
-  prompt(`Dealer hand: ${dealer}. Score: ${handTotal(dealer)}`);
+  prompt(`Your hand: ${player}. Score: ${total(player)}`);
+  prompt(`Dealer hand: ${dealer}. Score: ${total(dealer)}`);
 
   console.log('\n');
 
@@ -192,6 +192,9 @@ while (true) {
 
   dealHands(deck, [playerHand, dealerHand]);
 
+  let playerTotal = total(playerHand);
+  let dealerTotal = total(dealerHand);
+
   while (true) {
     // player actions
     while (true) {
@@ -221,7 +224,7 @@ while (true) {
     }
 
     while (true) {
-      if (handTotal(dealerHand) > 17 || isBust(dealerHand)) break;
+      if (total(dealerHand) > 17 || isBust(dealerHand)) break;
       drawCard(deck, dealerHand);
     }
 
