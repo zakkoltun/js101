@@ -197,23 +197,20 @@ while (true) {
     while (true) {
       displayGameInfo(playerHand, dealerHand);
 
-      prompt("Hit or stay? (Enter 'hit' or 'stay')");
+      prompt("Hit or stay? (Enter 'h' or 's')");
       let action = readline.question();
 
-      while (!['hit', 'stay'].includes(action)) {
-        prompt("Please enter 'hit' or 'stay'");
+      while (!['h', 's'].includes(action)) {
+        prompt("Please enter 'h' or 's'");
         action = readline.question();
       }
 
-      if (action === 'hit') {
+      if (action === 'h') {
         drawCard(deck, playerHand);
         displayResults(playerHand, dealerHand);
-        prompt('You chose to hit.');
       }
 
-      if (action === 'stay' || isBust(playerHand)) break;
-
-      //displayGameInfo(playerHand, dealerHand);
+      if (action === 's' || isBust(playerHand)) break;
     }
 
     if (isBust(playerHand)) {
