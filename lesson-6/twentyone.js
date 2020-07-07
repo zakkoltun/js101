@@ -1,9 +1,14 @@
-const BUST_LIMIT = 21;
-const DEALER_HIT_LIMIT = 17;
+const BUST_LIMIT = 32;
+const DEALER_HIT_LIMIT = 27;
+const ACE_VALUE_HIGH = 11;
+const STARTING_CARD_COUNT = 3;
 
 const CARD_VALUES = [
   '2', '3', '4', '5', '6', '7', '8', '9', '10',
   'J', 'Q', 'K', 'A'
+];
+const CARD_SUITES = [
+  'H', 'C', 'S', 'D'
 ];
 
 let readline = require('readline-sync');
@@ -21,34 +26,52 @@ function shuffle(deck) {
 }
 
 function initializeDeck() {
-  let expandedValues = CARD_VALUES.map(val => [val, val, val, val]);
-  let deck = [].concat(...expandedValues);
+  let deck = [];
+  CARD_VALUES.forEach(value => {
+    CARD_SUITES.forEach(suite => {
+      deck.push([value, suite]);
+    });
+  });
 
   return shuffle(deck);
 }
 
+function formatCard(card) {
+  let [value, suite] = card;
+  return `${value}_${suite}`;
+}
+
+function formatHand(hand) {
+  return hand.map(card => formatCard(card)).join(', ');
+}
+
+function cardValue(card) {
+  return card[0];
+}
+
 function revealFirstCard(hand) {
-  return hand[0];
+  return formatCard(hand[0]);
 }
 
 function displayGameInfo(playerHand, dealerHand, playerTotal) {
   console.clear();
 
-  prompt(`Your hand: ${playerHand.join(', ')}`);
-  prompt(`Dealer's top card: ${revealFirstCard(dealerHand)}\n`);
+  prompt(`Your hand: ${formatHand(playerHand)}`);
+  prompt(`Dealer's top card: ${formatHand(dealerHand)}\n`);
   prompt(`Your hand total: ${playerTotal}`);
 }
 
 // removes card from top of deck and adds to hand
 // mutates both deck and hand
 function drawCard(deck, hand) {
-  hand.push(deck.shift());
+  let card = deck.shift();
+  hand.push(card);
 }
 
 function dealHands(deck, hands) {
   let cardNumber = 1;
 
-  while (cardNumber <= 2) {
+  while (cardNumber <= STARTING_CARD_COUNT) {
     hands.forEach(hand => {
       drawCard(deck, hand);
     });
@@ -57,14 +80,14 @@ function dealHands(deck, hands) {
 }
 
 function countAcesInHand(hand) {
-  return hand.filter(card => card === 'A').length;
+  return hand.filter(card => cardValue(card) === 'A').length;
 }
 
 // input: str, output: number or string
 // takes a card value and outputs the corresponding number value
 // for aces, returns 'A', so value can be determined later
 function nonAceCardValue(card) {
-  switch (card) {
+  switch (cardValue(card)) {
     case 'J':
     case 'Q':
     case 'K':
@@ -72,7 +95,7 @@ function nonAceCardValue(card) {
     case 'A':
       return 'A';
     default:
-      return Number(card);
+      return Number(cardValue(card));
   }
 }
 
@@ -93,7 +116,8 @@ function values(hand) {
   handVals.forEach((card, idx) => {
     if (card === 'A') {
       numAces--;
-      handVals[idx] = total + numAces <= 10 ? 11 : 1;
+      handVals[idx] = total + numAces <= BUST_LIMIT - ACE_VALUE_HIGH ?
+        ACE_VALUE_HIGH : 1;
       total += handVals[idx];
     }
   });
@@ -146,14 +170,14 @@ function determineWinner(playerTotal, dealerTotal) {
 function displayResults(playerHand, dealerHand, playerTotal, dealerTotal) {
   console.log('\n');
 
-  prompt(`Your hand: ${playerHand}. Score: ${playerTotal}`);
-  prompt(`Dealer hand: ${dealerHand}. Score: ${dealerTotal}`);
+  prompt(`Your hand: ${formatHand(playerHand)}. Score: ${playerTotal}`);
+  prompt(`Dealer hand: ${formatHand(dealerHand)}. Score: ${dealerTotal}`);
 
   console.log('\n');
 
   switch (determineWinner(playerTotal, dealerTotal)) {
     case 'player':
-      prompt('You won!!');
+      prompt('You won!');
       break;
     case 'dealer':
       prompt('Dealer won. Better luck next time!');
