@@ -57,7 +57,7 @@ function displayGameInfo(playerHand, dealerHand, playerTotal) {
   console.clear();
 
   prompt(`Your hand: ${formatHand(playerHand)}`);
-  prompt(`Dealer's top card: ${formatHand(dealerHand)}\n`);
+  prompt(`Dealer's top card: ${revealFirstCard(dealerHand)}\n`);
   prompt(`Your hand total: ${playerTotal}`);
 }
 
