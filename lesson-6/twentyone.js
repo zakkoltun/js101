@@ -1,7 +1,7 @@
-const BUST_LIMIT = 32;
-const DEALER_HIT_LIMIT = 27;
+const BUST_LIMIT = 21;
+const DEALER_HIT_LIMIT = 17;
 const ACE_VALUE_HIGH = 11;
-const STARTING_CARD_COUNT = 3;
+const STARTING_CARD_COUNT = 2;
 const WINS_PER_MATCH = 3;
 
 const CARD_VALUES = [
@@ -69,14 +69,13 @@ function revealFirstCard(hand) {
   return formatCard(hand[0]);
 }
 
-function displayGameInfo(hands, totals) {
+function displayGameInfo(hands) {
   console.clear();
 
   prompt('TWENTY ONE\n');
 
   prompt(`Your hand: ${formatHand(hands.player)}`);
   prompt(`Dealer's top card: ${revealFirstCard(hands.dealer)}\n`);
-  prompt(`Your hand total: ${totals.player}`);
 }
 
 // removes card from top of deck and adds to hand
@@ -86,6 +85,9 @@ function drawCard(deck, hand) {
   hand.push(card);
 }
 
+// input: arr, object, output: none
+// Removes card from deck and adds to hands, STARTING_CARD_COUNT number of times
+// Mutates deck and hands
 function dealHands(deck, hands) {
   let cardNumber = 1;
 
@@ -173,6 +175,8 @@ function stayMessage() {
   prompt('You chose to stay.');
 }
 
+// input: object, output: string
+// Determines who one using totals of each hand. Return string.
 function determineWinner(totals) {
   if (isBust(totals.player)) {
     return 'dealer';
@@ -187,11 +191,30 @@ function determineWinner(totals) {
   }
 }
 
-function displayResults(hands, totals) {
+// input: object, output: none
+// Formats and prints the cards in each hand.
+function displayHands(hands) {
+  prompt(`Your hand: ${formatHand(hands.player)}`);
+  prompt(`Dealer hand: ${formatHand(hands.dealer)}`);
+}
+
+// input: object, output: none
+// Prints the player and dealer scores. Labels hands that are busts.
+function displayScores(totals) {
+  let playerBust = isBust(totals.player) ? '(bust)' : '';
+  let dealerBust = isBust(totals.dealer) ? '(bust)' : '';
+
+  prompt(`Your score: ${totals.player} ${playerBust}`);
+  prompt(`Dealer score: ${totals.dealer} ${dealerBust}`);
+}
+
+// input: 2 objects, output: none
+function displayGameResults(hands, totals) {
   console.log();
 
-  prompt(`Your hand: ${formatHand(hands.player)}. Score: ${totals.player}`);
-  prompt(`Dealer hand: ${formatHand(hands.dealer)}. Score: ${totals.dealer}`);
+  displayHands(hands);
+  console.log();
+  displayScores(totals);
 
   console.log();
 
@@ -208,11 +231,13 @@ function displayResults(hands, totals) {
   }
 }
 
+// input: object, output: string
 function determineMatchWinner(wins) {
   let winner = wins.player === WINS_PER_MATCH ? 'player' : 'dealer';
   return winner;
 }
 
+//input: object, output: none
 function displayMatchWinner(wins) {
   switch (determineMatchWinner(wins)) {
     case 'player':
@@ -267,7 +292,7 @@ function playerTurn(deck, hands, totals) {
       drawCard(deck, hands.player);
       totals.player = total(hands.player);
 
-      displayResults(hands, totals);
+      displayGameResults(hands, totals);
     }
 
     if (action === 's' || isBust(totals.player)) break;
@@ -278,7 +303,7 @@ function playerTurn(deck, hands, totals) {
 // Takes dealer turn(s). Hit until dealer's total reaches hit limit, then stay
 function dealerTurn(deck, hands, totals) {
   while (true) {
-    if (totals.dealer > DEALER_HIT_LIMIT || isBust(totals.dealer)) break;
+    if (totals.dealer >= DEALER_HIT_LIMIT || isBust(totals.dealer)) break;
     drawCard(deck, hands.dealer);
     totals.dealer = total(hands.dealer);
   }
@@ -289,6 +314,7 @@ function dealerTurn(deck, hands, totals) {
 // Game logic
 
 while (true) {
+  // match loop
 
   let wins = {
     player: 0,
@@ -296,6 +322,8 @@ while (true) {
   };
 
   while (true) {
+    // game loop
+
     let deck = initializeDeck();
 
     let hands = {
@@ -313,6 +341,7 @@ while (true) {
     while (true) {
       // player actions
       playerTurn(deck, hands, totals);
+      console.log();
 
       if (isBust(totals.player)) {
         bustMessage();
@@ -322,11 +351,10 @@ while (true) {
       }
 
       dealerTurn(deck, hands, totals);
-
       break;
     }
 
-    displayResults(hands, totals);
+    displayGameResults(hands, totals);
 
     let winner = determineWinner(totals);
 
@@ -340,6 +368,7 @@ while (true) {
     }
 
     displayDivider();
+
     prompt(`Your wins: ${wins.player}`);
     prompt(`Dealer wins: ${wins.dealer}`);
 
@@ -349,9 +378,9 @@ while (true) {
       break;
     }
 
+    console.log();
     prompt('Press any key to start next match');
     readline.question();
-
   }
 
   if (!playAgain()) break;
