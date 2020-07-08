@@ -2,6 +2,7 @@ const BUST_LIMIT = 32;
 const DEALER_HIT_LIMIT = 27;
 const ACE_VALUE_HIGH = 11;
 const STARTING_CARD_COUNT = 3;
+const WINS_PER_MATCH = 3;
 
 const CARD_VALUES = [
   '2', '3', '4', '5', '6', '7', '8', '9', '10',
@@ -17,6 +18,10 @@ function prompt(message) {
   console.log('=> ' + message);
 }
 
+function displayDivider() {
+  console.log('\n-------------------------------------------\n');
+}
+
 function shuffle(deck) {
   for (let index = deck.length - 1; index > 0; index--) {
     let otherIndex = Math.floor(Math.random() * (index + 1)); // 0 to index
@@ -25,6 +30,8 @@ function shuffle(deck) {
   return deck;
 }
 
+// input: none, output: 2D array
+// cards are represented as arrays: [value, suite]
 function initializeDeck() {
   let deck = [];
   CARD_VALUES.forEach(value => {
@@ -36,29 +43,40 @@ function initializeDeck() {
   return shuffle(deck);
 }
 
+// input: arr, output: string
+// formats a card into a string 'value_suite' for printing
 function formatCard(card) {
   let [value, suite] = card;
   return `${value}_${suite}`;
 }
 
+// input: 2D arr, output: string
+// formats a hand into a string for printing
+// Ex: [[3, D], [A, H], [Q, S]] => '3_D, A_H, Q_S'
 function formatHand(hand) {
   return hand.map(card => formatCard(card)).join(', ');
 }
 
+// input: arr, output: string
+// used to select the value in a card array
 function cardValue(card) {
   return card[0];
 }
 
+// input: 2D arr, output: string
+// Given a hand, returns the top card formatted as a string
 function revealFirstCard(hand) {
   return formatCard(hand[0]);
 }
 
-function displayGameInfo(playerHand, dealerHand, playerTotal) {
+function displayGameInfo(hands, totals) {
   console.clear();
 
-  prompt(`Your hand: ${formatHand(playerHand)}`);
-  prompt(`Dealer's top card: ${revealFirstCard(dealerHand)}\n`);
-  prompt(`Your hand total: ${playerTotal}`);
+  prompt('TWENTY ONE\n');
+
+  prompt(`Your hand: ${formatHand(hands.player)}`);
+  prompt(`Dealer's top card: ${revealFirstCard(hands.dealer)}\n`);
+  prompt(`Your hand total: ${totals.player}`);
 }
 
 // removes card from top of deck and adds to hand
@@ -72,7 +90,7 @@ function dealHands(deck, hands) {
   let cardNumber = 1;
 
   while (cardNumber <= STARTING_CARD_COUNT) {
-    hands.forEach(hand => {
+    Object.values(hands).forEach(hand => {
       drawCard(deck, hand);
     });
     cardNumber++;
@@ -83,7 +101,7 @@ function countAcesInHand(hand) {
   return hand.filter(card => cardValue(card) === 'A').length;
 }
 
-// input: str, output: number or string
+// input: arr, output: number or string
 // takes a card value and outputs the corresponding number value
 // for aces, returns 'A', so value can be determined later
 function nonAceCardValue(card) {
@@ -99,6 +117,8 @@ function nonAceCardValue(card) {
   }
 }
 
+// input: arr, output: num
+// adds up numeric values in input. Ex: ['A', 7, 3] => 10
 function addNumberValues(list) {
   return list.reduce((total, curr) => {
     return total + Number(curr) || total;
@@ -153,29 +173,29 @@ function stayMessage() {
   prompt('You chose to stay.');
 }
 
-function determineWinner(playerTotal, dealerTotal) {
-  if (isBust(playerTotal)) {
+function determineWinner(totals) {
+  if (isBust(totals.player)) {
     return 'dealer';
-  } else if (isBust(dealerTotal)) {
+  } else if (isBust(totals.dealer)) {
     return 'player';
-  } else if (playerTotal > dealerTotal) {
+  } else if (totals.player > totals.dealer) {
     return 'player';
-  } else if (playerTotal < dealerTotal) {
+  } else if (totals.player < totals.dealer) {
     return 'dealer';
   } else {
     return 'tie';
   }
 }
 
-function displayResults(playerHand, dealerHand, playerTotal, dealerTotal) {
-  console.log('\n');
+function displayResults(hands, totals) {
+  console.log();
 
-  prompt(`Your hand: ${formatHand(playerHand)}. Score: ${playerTotal}`);
-  prompt(`Dealer hand: ${formatHand(dealerHand)}. Score: ${dealerTotal}`);
+  prompt(`Your hand: ${formatHand(hands.player)}. Score: ${totals.player}`);
+  prompt(`Dealer hand: ${formatHand(hands.dealer)}. Score: ${totals.dealer}`);
 
-  console.log('\n');
+  console.log();
 
-  switch (determineWinner(playerTotal, dealerTotal)) {
+  switch (determineWinner(totals)) {
     case 'player':
       prompt('You won!');
       break;
@@ -188,8 +208,25 @@ function displayResults(playerHand, dealerHand, playerTotal, dealerTotal) {
   }
 }
 
+function determineMatchWinner(wins) {
+  let winner = wins.player === WINS_PER_MATCH ? 'player' : 'dealer';
+  return winner;
+}
+
+function displayMatchWinner(wins) {
+  switch (determineMatchWinner(wins)) {
+    case 'player':
+      prompt('You won the match!');
+      break;
+    case 'dealer':
+      prompt('Dealer won the match.');
+      break;
+  }
+}
+
+// input: none, output: boolean
 function playAgain() {
-  prompt(`Play again? (y/n)`);
+  prompt(`Play another match? (y/n)`);
   let answer = readline.question();
 
   while (!['y', 'n'].includes(answer)) {
@@ -204,6 +241,8 @@ function playAgain() {
   }
 }
 
+// input: none, output: string
+// Asks user for an action. Keep asking until valid answer given
 function getPlayerAction() {
   prompt("Hit or stay? (Enter 'h' or 's')");
   let action = readline.question();
@@ -215,55 +254,105 @@ function getPlayerAction() {
   return action;
 }
 
+// input: three objects, output: none
+// Mutates deck, hands, and totals
+// Interacts with player to determine actions (hit or stay)
+function playerTurn(deck, hands, totals) {
+  while (true) {
+    displayGameInfo(hands, totals);
+
+    let action = getPlayerAction();
+
+    if (action === 'h') {
+      drawCard(deck, hands.player);
+      totals.player = total(hands.player);
+
+      displayResults(hands, totals);
+    }
+
+    if (action === 's' || isBust(totals.player)) break;
+  }
+}
+
+// input: three objects, output: none
+// Takes dealer turn(s). Hit until dealer's total reaches hit limit, then stay
+function dealerTurn(deck, hands, totals) {
+  while (true) {
+    if (totals.dealer > DEALER_HIT_LIMIT || isBust(totals.dealer)) break;
+    drawCard(deck, hands.dealer);
+    totals.dealer = total(hands.dealer);
+  }
+}
+
 // ----------------------------------------------------------------------
 
 // Game logic
 
 while (true) {
-  let deck = initializeDeck();
 
-  let playerHand = [];
-  let dealerHand = [];
-
-  dealHands(deck, [playerHand, dealerHand]);
-
-  let playerTotal = total(playerHand);
-  let dealerTotal = total(dealerHand);
+  let wins = {
+    player: 0,
+    dealer: 0
+  };
 
   while (true) {
-    // player actions
+    let deck = initializeDeck();
+
+    let hands = {
+      player: [],
+      dealer: []
+    };
+
+    dealHands(deck, hands);
+
+    let totals = {
+      player: total(hands.player),
+      dealer: total(hands.dealer)
+    };
+
     while (true) {
-      displayGameInfo(playerHand, dealerHand, playerTotal);
+      // player actions
+      playerTurn(deck, hands, totals);
 
-      let action = getPlayerAction();
-
-      if (action === 'h') {
-        drawCard(deck, playerHand);
-        playerTotal = total(playerHand);
-
-        displayResults(playerHand, dealerHand, playerTotal, dealerTotal);
+      if (isBust(totals.player)) {
+        bustMessage();
+        break;
+      } else {
+        stayMessage();
       }
 
-      if (action === 's' || isBust(playerTotal)) break;
-    }
+      dealerTurn(deck, hands, totals);
 
-    if (isBust(playerTotal)) {
-      bustMessage();
       break;
-    } else {
-      stayMessage();
     }
 
-    while (true) {
-      if (dealerTotal > DEALER_HIT_LIMIT || isBust(dealerTotal)) break;
-      drawCard(deck, dealerHand);
-      dealerTotal = total(dealerHand);
+    displayResults(hands, totals);
+
+    let winner = determineWinner(totals);
+
+    switch (winner) {
+      case 'player':
+        wins.player++;
+        break;
+      case 'dealer':
+        wins.dealer++;
+        break;
     }
 
-    break;
+    displayDivider();
+    prompt(`Your wins: ${wins.player}`);
+    prompt(`Dealer wins: ${wins.dealer}`);
+
+    if (wins.player === WINS_PER_MATCH || wins.dealer === WINS_PER_MATCH) {
+      displayDivider();
+      displayMatchWinner(wins);
+      break;
+    }
+
+    prompt('Press any key to start next match');
+    readline.question();
+
   }
-
-  displayResults(playerHand, dealerHand, playerTotal, dealerTotal);
 
   if (!playAgain()) break;
 }
